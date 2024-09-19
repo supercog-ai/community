@@ -9,4 +9,5 @@ Go try out the product now, for free: https://app.supercog.ai
 You can help find docs at the [Wiki](https://github.com/supercog-ai/community/wiki)  or
 visit the [forum](https://github.com/supercog-ai/community/discussions) for help.
 
+Join our [Discord server](https://discord.gg/PYqM6hZZ).
 
