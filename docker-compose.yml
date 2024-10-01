@@ -1,8 +1,7 @@
 services:
   dashboard:
+    image: supercogai/dashboard:latest
     build:
-      context: ..
-      dockerfile: ./dashboard/Dockerfile
       args:
         - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
         - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
@@ -33,9 +32,7 @@ services:
       - SKIP_EMAIL_VERIFICATION=1
 
   engine:
-    build:
-      context: ..
-      dockerfile: ./engine/Dockerfile
+    image: supercogai/engine:latest
     ports:
       - "8080:8080"
     depends_on:
