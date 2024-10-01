@@ -1,3 +1,4 @@
 .env
 env.base
 keys
+.DS_Store
