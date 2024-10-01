@@ -1,0 +1,94 @@
+services:
+  dashboard:
+    build:
+      context: ..
+      dockerfile: ./dashboard/Dockerfile
+      args:
+        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+        - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
+
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    depends_on:
+      engine:
+        condition: service_started
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    environment:
+      - ENGINE_URL=http://engine:8080
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://pguser:password@postgres:5432/dbname
+      - CREDENTIALS_MASTER_KEY=${CREDENTIALS_MASTER_KEY}
+      - ENV=dev
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DASH_PRIVATE_KEY=${DASH_PRIVATE_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
+      - SKIP_EMAIL_VERIFICATION=1
+
+  engine:
+    build:
+      context: ..
+      dockerfile: ./engine/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://pguser:password@postgres:5432/dbname
+      - CREDENTIALS_MASTER_KEY=${CREDENTIALS_MASTER_KEY}
+      - ENV=dev
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DASH_PUBLIC_KEY=${DASH_PUBLIC_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
+      - S3_FILES_BUCKET_NAME=${S3_FILES_BUCKET_NAME}
+      - SPECIAL_TOOLS=1
+      - SUPERCOG_LOCAL_TOOLS=/var/lib/supercog/tools
+    volumes:
+      - ${HOME}/supercog/sc_localfiles:/var/lib/supercog
+      - ${HOME}/supercog/tools:/var/lib/supercog/tools
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=dbname
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c select"]
+      start_period: 30s
+      start_interval: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - ${HOME}/supercog/postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+
+volumes:
+  postgres_data:
+    driver: local
+  sc_localfiles:
+    driver: local
