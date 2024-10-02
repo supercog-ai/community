@@ -1,11 +1,6 @@
 services:
   dashboard:
     image: supercogai/dashboard:latest
-    build:
-      args:
-        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-        - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
-
     ports:
       - "3000:3000"
       - "8000:8000"
@@ -14,21 +9,12 @@ services:
         condition: service_started
       redis:
         condition: service_started
+      minio:
+        condition: service_started
       postgres:
         condition: service_healthy
+    env_file: .env
     environment:
-      - ENGINE_URL=http://engine:8080
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://pguser:password@postgres:5432/dbname
-      - CREDENTIALS_MASTER_KEY=${CREDENTIALS_MASTER_KEY}
-      - ENV=dev
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - DASH_PRIVATE_KEY=${DASH_PRIVATE_KEY}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
-      - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
       - SKIP_EMAIL_VERIFICATION=1
 
   engine:
@@ -38,27 +24,17 @@ services:
     depends_on:
       redis:
         condition: service_started
+      minio:
+        condition: service_started
       postgres:
         condition: service_healthy
-      
+    env_file: .env
     environment:
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://pguser:password@postgres:5432/dbname
-      - CREDENTIALS_MASTER_KEY=${CREDENTIALS_MASTER_KEY}
-      - ENV=dev
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - DASH_PUBLIC_KEY=${DASH_PUBLIC_KEY}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
-      - S3_PUBLIC_BUCKET=${S3_PUBLIC_BUCKET}
-      - S3_FILES_BUCKET_NAME=${S3_FILES_BUCKET_NAME}
       - SPECIAL_TOOLS=1
       - SUPERCOG_LOCAL_TOOLS=/var/lib/supercog/tools
     volumes:
-      - ${HOME}/supercog/sc_localfiles:/var/lib/supercog
-      - ${HOME}/supercog/tools:/var/lib/supercog/tools
+      - ./supercog/sc_localfiles:/var/lib/supercog
+      - ./supercog/tools:/var/lib/supercog/tools
 
   redis:
     image: redis:latest
@@ -81,11 +57,27 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ${HOME}/supercog/postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
+
+  minio:
+    image: bitnami/minio:latest
+    ports:
+      - '${MINIO_API_PORT_NUMBER}:${MINIO_API_PORT_NUMBER}'
+      - '${MINIO_CONSOLE_PORT_NUMBER}:${MINIO_CONSOLE_PORT_NUMBER}'
+    environment:
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_KEY}
+      - MINIO_DEFAULT_BUCKETS=${S3_PUBLIC_BUCKET}:public,${S3_FILES_BUCKET_NAME}:public
+      - MINIO_API_PORT_NUMBER=${MINIO_API_PORT_NUMBER}
+      - MINIO_CONSOLE_PORT_NUMBER=${MINIO_CONSOLE_PORT_NUMBER}
+    volumes:
+      - minio_data:/bitnami/minio/data
 
 volumes:
   postgres_data:
     driver: local
   sc_localfiles:
+    driver: local
+  minio_data:
     driver: local
