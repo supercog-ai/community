@@ -16,26 +16,18 @@ You will need these core pieces:
 
 1. Docker
 2. OpenAI [API key](https://openai.com/index/openai-api/)
-3. AWS access keys for S3, and 2 S3 buckets, for storing files
 
 Optional:
 
-4. Google Oauth client to enable Google Auth
-5. AWS configuration for Simple Mail Service. Provide keys that are enabled for SES
+3. Google Oauth client to enable Google Auth
+4. AWS configuration for Simple Mail Service. Provide keys that are enabled for SES
 if you want to use the built in "Send Email" tool.
 
 ## Installation
 
-First, create two buckets in S3 to store application files. One bucket should be
-public readable, for storing generated and sharable image files. The other bucket
-should be private for storing data.
+First, copy `env.example` to `env.base`.
 
-Now copy `env.example` to `env.base`.
-
-Edit `env.base` to add your config keys. Set the S3 buckets like:
-
-    S3_PUBLIC_BUCKET - name of the public readable bucket
-    S3_FILES_BUCKET_NAME - private bucket for all other files
+Edit `env.base` to add your `OPENAI_API_KEY`, and optionally add your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
 
 Run setup:
 
@@ -55,7 +47,7 @@ email address, but verification will be skipped by default.
 ## Creating new tools
 
 To create new tools, just add tool class definitions in Python into
-the directory `$HOME/supercog/tools`. The `DummyTool` example tool,
+the directory `./supercog/tools`. The `DummyTool` example tool,
 which provides a single `calc_fibonacci` function, is placed there
 as an example.
 
@@ -75,3 +67,15 @@ Examples of tools which require an API key include:
 - Tavily search tool
 - SERP Scale Web Search
 - Zyte Web screenshots
+
+## Accessing uploaded files
+We use MinIO to store any files you upload locally. (See their
+[Github](https://github.com/minio/minio) and
+[Docker Hub](https://hub.docker.com/r/minio/minio)).
+These files will persist in the docker volumne `supercog-dev_minio-data`.
+To view the files and images in MinIO, use their console by going to:
+
+    http://localhost:9003
+
+All images will be stored in the `images-bucket` and all other
+files will be stored in the `files-bucket`.

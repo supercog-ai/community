@@ -5,7 +5,7 @@ if [ ! -f "env.base" ]; then
     exit 1
 fi
 mkdir -p ~/supercog/tools
-cp ./dummy_tool.py ~/supercog/tools
+cp ./dummy_tool.py ./supercog/tools
 cp env.base .env
 mkdir ./keys
 openssl ecparam -name prime256v1 -genkey -noout -out ./keys/dash_ecdsa_private_key.pem
