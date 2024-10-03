@@ -64,9 +64,11 @@ on the `Settings` page to store the value.
 
 Examples of tools which require an API key include:
 
-- Tavily search tool
-- SERP Scale Web Search
-- Zyte Web screenshots
+- [Tavily](https://tavily.com/#api) search tool
+- [ScaleSERP](https://app.scaleserp.com/) Web Search
+- [Zyte](https://docs.zyte.com/zyte-api/get-started.html) Web screenshots
+
+Most of these services have a free tier you can get started with.
 
 ## Accessing uploaded files
 We use MinIO to store any files you upload locally. (See their
