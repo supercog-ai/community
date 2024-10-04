@@ -33,8 +33,8 @@ services:
       - SPECIAL_TOOLS=1
       - SUPERCOG_LOCAL_TOOLS=/var/lib/supercog/tools
     volumes:
-      - ./supercog/sc_localfiles:/var/lib/supercog
-      - ./supercog/tools:/var/lib/supercog/tools
+      - ./local_data/sc_localfiles:/var/lib/supercog
+      - ./local_data/tools:/var/lib/supercog/tools
 
   redis:
     image: redis:latest

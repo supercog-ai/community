@@ -27,7 +27,7 @@ if you want to use the built in "Send Email" tool.
 
 First, copy `env.example` to `env.base`.
 
-Edit `env.base` to add your `OPENAI_API_KEY`, and optionally add your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+Edit `env.base` to set your `OPENAI_API_KEY`.
 
 Run setup:
 
@@ -39,10 +39,52 @@ Run from Docker:
 
 And now open the Dashboard:
 
-http://localhost:3000
+http://localhost:3000/register/
 
-Unless you created your own Google OAuth client, you will have to register with an
-email address, but verification will be skipped by default.
+Now create an account with an email address to get started.
+
+## Using Supercog
+
+When you first login you will see a set of example agents that you can
+try out. Just click on the agent and start typing into the Prompt box. You
+can try adjusting the _Agent Instructions_ to see how you can change the
+agent's behavior.
+
+Now try opening the special _Supercog_ agent. This pre-built agent has
+instructions for dynamically adding and working with tools. Try a conversation
+like this:
+
+```text
+    you) What tools are available?_
+
+    Here are the tools that are available for use:
+
+    Admin
+    REST API (Authorized)
+    Send Email (built-in)
+    ...
+
+    you) Let's add the Github tool
+    ...
+      enabling the Github tool
+    ...
+```
+
+when you add the Github tool, you will be prompted to enter an access token. You
+can make one from Github->Settings (look for _Developer Settings_). Once you have
+connected Github then you can access your repos, issues, etc...
+
+Here are some other things to try with tools:
+
+- Try adding the Image Recognition tool (just type "add image recognition") then upload an image and ask Supercog
+to explain what's in it.
+
+- Try using "text to speech" to create audio output. We use this in the "Morning News Reporter" demo agent.
+
+- Use the Database tool to connect to a database you have any, then try _text to SQL_ by
+asking questions about your data in plain English. Bonus points: add the Charting tool
+and try creating charts from your data.
+
 
 ## Creating new tools
 

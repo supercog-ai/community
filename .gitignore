@@ -3,3 +3,5 @@ env.base
 keys
 .DS_Store
 supercog
+local_data
+
