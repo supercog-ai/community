@@ -2,6 +2,7 @@
 
 <img width="1103" alt="Screenshot 2024-10-02 at 4 17 00 PM" src="https://github.com/user-attachments/assets/98377aea-f2a0-4a52-81fe-be3878c80562">
 
+💡 Visit the [Community](https://github.com/supercog-ai/community/) for help!
 
 This repo will help you get setup to run the Supercog system on your local
 machine. This is especially useful if you need to:
