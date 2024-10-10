@@ -1,0 +1,83 @@
+services:
+  dashboard:
+    image: supercogai/dashboard:latest
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    depends_on:
+      engine:
+        condition: service_started
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      - SKIP_EMAIL_VERIFICATION=1
+
+  engine:
+    image: supercogai/engine:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      - SPECIAL_TOOLS=1
+      - SUPERCOG_LOCAL_TOOLS=/var/lib/supercog/tools
+    volumes:
+      - ./local_data/sc_localfiles:/var/lib/supercog
+      - ./local_data/tools:/var/lib/supercog/tools
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=dbname
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c select"]
+      start_period: 30s
+      start_interval: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+
+  minio:
+    image: bitnami/minio:latest
+    ports:
+      - '${MINIO_API_PORT_NUMBER}:${MINIO_API_PORT_NUMBER}'
+      - '${MINIO_CONSOLE_PORT_NUMBER}:${MINIO_CONSOLE_PORT_NUMBER}'
+    environment:
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_KEY}
+      - MINIO_DEFAULT_BUCKETS=${S3_PUBLIC_BUCKET}:public,${S3_FILES_BUCKET_NAME}:public
+      - MINIO_API_PORT_NUMBER=${MINIO_API_PORT_NUMBER}
+      - MINIO_CONSOLE_PORT_NUMBER=${MINIO_CONSOLE_PORT_NUMBER}
+    volumes:
+      - minio_data:/bitnami/minio/data
+
+volumes:
+  postgres_data:
+    driver: local
+  sc_localfiles:
+    driver: local
+  minio_data:
+    driver: local
